@@ -1,0 +1,90 @@
+.item-selector {
+  padding: 20px;
+}
+
+.selector-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: end;
+}
+
+.selector-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.date-group {
+  display: flex;
+  gap: 15px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.date-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.selector-group label,
+.date-input label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.selector-group select,
+.date-input input {
+  padding: 10px;
+  border: 2px solid #e1e5e9;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.selector-group select:focus,
+.date-input input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: fit-content;
+}
+
+.search-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.search-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .selector-row {
+    flex-direction: column;
+  }
+  
+  .date-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .date-input {
+    flex: 1;
+  }
+}

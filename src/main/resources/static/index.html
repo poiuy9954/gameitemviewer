@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Item Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Game Item Viewer</h1>
+            <p>로스트아크 아이템 가격 분석 및 추이 확인 서비스</p>
+        </div>
+
+        <!-- 아이템 선택 -->
+        <div class="card">
+            <h3>아이템 선택</h3>
+            <div class="form-group">
+                <label for="itemSelect">아이템:</label>
+                <select id="itemSelect">
+                    <option value="">아이템을 선택하세요</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">시작 날짜:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="endDate">종료 날짜:</label>
+                <input type="date" id="endDate">
+            </div>
+            <button class="btn" onclick="loadAnalysis()">분석하기</button>
+            <button class="btn" onclick="loadTrend()">추이 보기</button>
+        </div>
+
+        <!-- 통계 정보 -->
+        <div class="card" id="statsCard" style="display: none;">
+            <h3>가격 분석</h3>
+            <div class="stats-grid" id="statsGrid">
+                <!-- 통계 데이터가 여기에 표시됩니다 -->
+            </div>
+        </div>
+
+        <!-- 차트 -->
+        <div class="card" id="chartCard" style="display: none;">
+            <h3>가격 추이</h3>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 로딩/에러 메시지 -->
+        <div id="loading" class="loading" style="display: none;">
+            데이터를 불러오는 중...
+        </div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        // 페이지 로드 시 아이템 목록 불러오기
+        document.addEventListener('DOMContentLoaded', function() {
+            loadItemNames();
+            
+            // 기본 날짜 설정 (최근 7일)
+            const today = new Date();
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('endDate').valueAsDate = today;
+            document.getElementById('startDate').valueAsDate = weekAgo;
+        });
+
+        // 아이템 목록 불러오기
+        async function loadItemNames() {
+            try {
+                showLoading(true);
+                const response = await fetch('/api/items/names');
+                const itemNames = await response.json();
+                
+                const select = document.getElementById('itemSelect');
+                select.innerHTML = '<option value="">아이템을 선택하세요</option>';
+                
+                itemNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    select.appendChild(option);
+                });
+                
+                showLoading(false);
+            } catch (error) {
+                showError('아이템 목록을 불러오는데 실패했습니다: ' + error.message);
+                showLoading(false);
+            }
+        }
+
+        // 가격 분석 불러오기
+        async function loadAnalysis() {
+            const itemName = document.getElementById('itemSelect').value;
+            if (!itemName) {
+                alert('아이템을 선택하세요');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                const response = await fetch(`/api/items/${encodeURIComponent(itemName)}/analysis`);
+                const analysis = await response.json();
+                
+                showStats(analysis);
+                showLoading(false);
+            } catch (error) {
+                showError('분석 데이터를 불러오는데 실패했습니다: ' + error.message);
+                showLoading(false);
+            }
+        }
+
+        // 가격 추이 불러오기
+        async function loadTrend() {
+            const itemName = document.getElementById('itemSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!itemName) {
+                alert('아이템을 선택하세요');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                let url = `/api/items/${encodeURIComponent(itemName)}/trend`;
+                if (startDate && endDate) {
+                    url += `?startDate=${startDate}&endDate=${endDate}`;
+                }
+                
+                const response = await fetch(url);
+                const trendData = await response.json();
+                
+                showChart(trendData);
+                showLoading(false);
+            } catch (error) {
+                showError('추이 데이터를 불러오는데 실패했습니다: ' + error.message);
+                showLoading(false);
+            }
+        }
+
+        // 통계 표시
+        function showStats(analysis) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">평균 가격</div>
+                    <div class="stat-value">${analysis.averagePrice?.toLocaleString() || 'N/A'}골드</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">최고 가격</div>
+                    <div class="stat-value">${analysis.maxPrice?.toLocaleString() || 'N/A'}골드</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">최저 가격</div>
+                    <div class="stat-value">${analysis.minPrice?.toLocaleString() || 'N/A'}골드</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">거래 건수</div>
+                    <div class="stat-value">${analysis.totalCount?.toLocaleString() || 'N/A'}건</div>
+                </div>
+            `;
+            document.getElementById('statsCard').style.display = 'block';
+        }
+
+        // 차트 표시
+        function showChart(trendData) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            const labels = trendData.map(item => new Date(item.date).toLocaleDateString());
+            const prices = trendData.map(item => item.price);
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '가격',
+                        data: prices,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '가격 (골드)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '날짜'
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('chartCard').style.display = 'block';
+        }
+
+        // 로딩 표시
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // 에러 표시
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

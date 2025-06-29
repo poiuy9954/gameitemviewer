@@ -1,0 +1,127 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Java
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# Spring Boot
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Application logs
+logs/
+*.log
+application-local.yml
+application-local.properties
+
+# Database
+*.db
+*.sqlite
+*.h2.db
+
+# Frontend (React/Node.js)
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Package managers
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Security
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Cache
+.cache/
+*.cache
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Test results
+test-results/
+junit.xml
