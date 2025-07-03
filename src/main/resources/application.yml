@@ -5,7 +5,7 @@ spring:
     active: prod
 
   datasource:
-    url: jdbc:mysql://localhost:3306/lostarkDB?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://db:3306/lostarkDB?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
     username: loadb_user
     password: user1120
     driver-class-name: com.mysql.cj.jdbc.Driver
