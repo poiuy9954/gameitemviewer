@@ -2,12 +2,12 @@ spring:
   application:
     name: gameItemViewer
   profiles:
-    active: prod
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
-    url: jdbc:mysql://db:3306/lostarkDB?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-    username: loadb_user
-    password: user1120
+    url: jdbc:mysql://${MYSQL_DATA_HOSTNAME}:3306/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${database.user}
+    password: ${database.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     
   jpa:
